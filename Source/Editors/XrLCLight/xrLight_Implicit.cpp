@@ -74,6 +74,10 @@ void	ImplicitExecute::	send_result				( IWriter	&w ) const
 }
 
 
+u32 ThreadIDWork = 0;
+xrCriticalSection csImplicit;
+
+
 void	ImplicitExecute::	Execute	( net_task_callback *net_callback )
 	{
 		R_ASSERT( y_start != (u32(-1)) );
@@ -96,8 +100,18 @@ void	ImplicitExecute::	Execute	( net_task_callback *net_callback )
 		
 		// Lighting itself
 		DB.ray_options	(0);
-		for (u32 V=y_start; V<y_end; V++)
+		
+		
+		//for (u32 V=y_start; V<y_end; V++)
+		while (true)
 		{
+			csImplicit.Enter();
+			int V = ThreadIDWork;
+			ThreadIDWork++;
+			csImplicit.Leave();
+
+			if (V >= defl.Height())
+				break;
 
 			for (u32 U=0; U<defl.Width(); U++)
 			{
@@ -184,6 +198,8 @@ void ImplicitLightingTreadNetExec( void *p  )
 	implicit_net_lock.Leave();
 }
 
+
+
 static xr_vector<u32> not_clear;
 void ImplicitLightingExec(BOOL b_net)
 {
@@ -231,6 +247,9 @@ void ImplicitLightingExec(BOOL b_net)
 		// Setup cache
 		Progress					(0);
 		cl_globs.Initialize( defl );
+
+		ThreadIDWork = 0;
+
 		if(b_net)
 			lc_net::RunImplicitnet( defl, not_clear );
 		else

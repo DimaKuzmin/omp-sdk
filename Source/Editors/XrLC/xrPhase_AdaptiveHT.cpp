@@ -119,32 +119,35 @@ void GSaveAsSMF					(LPCSTR fname)
 	FS.w_close	(W);
 }
 */
+
+u32 ThreadIDWorkAHT = 0;
+xrCriticalSection csAdaptive;
+
 class CPrecalcBaseHemiThread: 
 public CThread
 {
-	u32 _from, _to;
-	CDB::COLLIDER	DB;
+ 	CDB::COLLIDER	DB;
 	
 public:
-	CPrecalcBaseHemiThread(u32 ID, u32 from, u32 to ): CThread(ID), _from( from ), _to( to )
+	CPrecalcBaseHemiThread(u32 ID ): CThread(ID) 
 	{
-		R_ASSERT(from!=u32(-1));
-		R_ASSERT(to!=u32(-1));
-		R_ASSERT( from < to );
-		R_ASSERT(from>=0);
-		R_ASSERT(to>0);
+ 
 	}
 virtual	void Execute()
 	{
 		DB.ray_options	(0);
-		for (u32 vit =_from; vit < _to; vit++)	
+		while (true)
 		{
 			base_color_c		vC;
-			R_ASSERT( vit != u32(-1) );
+			 
 			vecVertex			&verts = lc_global_data()->g_vertices();
-			R_ASSERT( vit>=0 );
-			R_ASSERT( vit<verts.size() );
-			Vertex*		V		= verts[vit];
+
+			csAdaptive.Enter();
+			int VID = ThreadIDWorkAHT;
+			ThreadIDWorkAHT++;
+			csAdaptive.Leave();
+
+			Vertex*		V		= verts[VID];
 			
 			R_ASSERT( V );
 			V->normalFromAdj	();
@@ -199,6 +202,7 @@ void CBuild::xrPhase_AdaptiveHT	()
 		//	V->C._set			(vC);
 		//}
 
+		/* 
 		u32	stride			= u32(-1);
 		
 		u32 threads			= u32(-1);
@@ -211,6 +215,12 @@ void CBuild::xrPhase_AdaptiveHT	()
 			precalc_base_hemi.start	( xr_new<CPrecalcBaseHemiThread> (thID,thID*stride,thID*stride + stride ) );
 		if(rest > 0)
 			precalc_base_hemi.start	( xr_new<CPrecalcBaseHemiThread> (threads,threads*stride,threads*stride + rest ) );
+		precalc_base_hemi.wait();
+		*/
+
+		ThreadIDWorkAHT = 0;
+		for (u32 thID = 0; thID < lc_global_data()->getMaxThreads(); thID++)
+			precalc_base_hemi.start(xr_new<CPrecalcBaseHemiThread>(thID) );
 		precalc_base_hemi.wait();
 		//precalc_base_hemi
 	}
