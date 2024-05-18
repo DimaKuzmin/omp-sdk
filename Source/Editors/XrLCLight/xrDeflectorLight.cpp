@@ -12,6 +12,133 @@
 //const	u32	rms_discard			= 8;
 //extern	BOOL		gl_linear	;
 
+// NEW CDB CODE
+
+// NEW CDB_RAY
+void FilterFunction(OpcodeArgs* args)
+{
+	CDB::MODEL* MDL = (CDB::MODEL*)args->MDL;
+
+	// Access to texture
+	CDB::TRI& clT = MDL->get_tris()[args->hit_struct.prim];
+	base_Face* F = (base_Face*) clT.pointer;
+
+	if (0 == F || args->skip == F)
+		return;
+
+	const Shader_xrLC& SH = F->Shader();
+	if (!SH.flags.bLIGHT_CastShadow ) //
+		return;
+
+	if (F->flags.bOpaque)
+	{
+		R_Light& light = (*((R_Light*)args->Light));
+
+		// Opaque poly - cache it
+		light.tri[0].set(MDL->get_verts()[clT.verts[0]]);
+		light.tri[1].set(MDL->get_verts()[clT.verts[1]]);
+		light.tri[2].set(MDL->get_verts()[clT.verts[2]]);
+
+		args->valid = false;
+		args->energy = 0;
+		return;
+	}
+
+	b_material& M = inlc_global_data()->materials()[F->dwMaterial];
+	b_texture& T = inlc_global_data()->textures()[M.surfidx];
+
+	if (T.pSurface.Empty())
+	{
+		F->flags.bOpaque = true;
+
+		clMsg("* ERROR: RAY-TRACE: Strange face detected... Has alpha without texture... %s", T.name);
+
+		args->valid = false;
+		args->energy = 0;
+		return;
+	}
+
+	// barycentric coords
+	// note: W,U,V order
+	Fvector B;
+	B.set(1.0f - args->hit_struct.u - args->hit_struct.v, args->hit_struct.u, args->hit_struct.v);
+
+	// calc UV
+	Fvector2* cuv = F->getTC0();
+	Fvector2	uv;
+	uv.x = cuv[0].x * B.x + cuv[1].x * B.y + cuv[2].x * B.z;
+	uv.y = cuv[0].y * B.x + cuv[1].y * B.y + cuv[2].y * B.z;
+
+	int U = iFloor(uv.x * float(T.dwWidth) + .5f);
+	int V = iFloor(uv.y * float(T.dwHeight) + .5f);
+	U %= T.dwWidth;
+	if (U < 0) U += T.dwWidth;
+	V %= T.dwHeight;
+	if (V < 0) V += T.dwHeight;
+
+	u32* raw = static_cast<u32*>(*T.pSurface);
+	u32 pixel = raw[V * T.dwWidth + U];
+	u32 pixel_a = color_get_A(pixel);
+	float opac = 1.f - _sqr(float(pixel_a) / 255.f);
+
+	args->energy *= opac;
+
+	// Energy Dead
+	if (args->energy < 0.001f)
+		args->valid = false;
+};
+
+float rayTraceCheck(CDB::COLLIDER* DB, CDB::MODEL* MDL, R_Light& L, Fvector& P, Fvector& D, float R, Face* skip)
+{
+	R_ASSERT(DB);
+
+	// 1. Check cached polygon	 
+	float _u, _v, range;
+	bool res = CDB::TestRayTri(P, D, L.tri, _u, _v, range, false);
+	if (res)
+		if (range > 0 && range < R)
+		{
+			return 0;
+		}
+
+	// 2. Polygon doesn't pick - real database query
+
+	OpcodeContext ctxt;
+	ctxt.filter = &FilterFunction;
+	ctxt.r_dir = D;
+	ctxt.r_start = P;
+	ctxt.r_range = R;
+
+
+	OpcodeArgs args;
+	args.energy = 1.0f;
+	args.Light = (void*)&L;
+	args.skip = (void*)skip;
+	args.MDL = (void*)MDL;
+	args.valid = 1;
+	args.pos = P;
+
+	ctxt.result = &args;
+
+	DB->rayTrace1(&ctxt);
+
+	return ctxt.result->energy;
+}
+
+
+
+// LMAPS SIZE
+int SizeLmaps = 0;
+XRLC_LIGHT_API void SetLmapSize(int Size)
+{
+	SizeLmaps = Size;
+}
+
+XRLC_LIGHT_API int GetLmapSize()
+{
+	return SizeLmaps;
+}
+
 void Jitter_Select(Fvector2* &Jitter, u32& Jcount)
 {
 	static Fvector2 Jitter1[1] = {
@@ -420,6 +547,9 @@ float getLastRP_Scale(CDB::COLLIDER* DB, CDB::MODEL* MDL, R_Light& L, Face* skip
 
 float rayTrace	(CDB::COLLIDER* DB, CDB::MODEL* MDL, R_Light& L, Fvector& P, Fvector& D, float R, Face* skip, BOOL bUseFaceDisable)
 {
+	return rayTraceCheck(DB, MDL, L, P, D, R, skip);
+
+	/*
 	R_ASSERT	(DB);
 
 	// 1. Check cached polygon
@@ -439,6 +569,7 @@ float rayTrace	(CDB::COLLIDER* DB, CDB::MODEL* MDL, R_Light& L, Fvector& P, Fvec
 		return getLastRP_Scale(DB,MDL, L,skip,bUseFaceDisable);
 	}
 	return 0;
+	*/
 }
 
 void LightPoint(CDB::COLLIDER* DB, CDB::MODEL* MDL, base_color_c &C, Fvector &P, Fvector &N, base_lighting& lights, u32 flags, Face* skip)

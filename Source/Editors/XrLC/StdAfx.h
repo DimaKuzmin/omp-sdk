@@ -8,6 +8,9 @@
 
 #pragma once
 
+#pragma warning (disable:4995)
+#pragma warning (disable:4996)
+
 //#include "../../xrCore/xrCore.h"
 
 #include "../xrLCLight/xrLC_Light.h"

@@ -20,7 +20,7 @@
 
 CThreadManager			mu_base;
 CThreadManager			mu_secondary;
-#define		MU_THREADS	4
+ 
 // mu-light
 bool mu_models_local_calc_lightening = false;
 xrCriticalSection		mu_models_local_calc_lightening_wait_lock;
@@ -61,6 +61,7 @@ public:
 		{
 		
 			inlc_global_data()->mu_refs()[m]->calc_lighting	();
+			clMsg("Process Ref: %s", inlc_global_data()->mu_refs()[m]->model->m_name.c_str());
 			thProgress							= (float(m-low)/float(high-low));
 		}
 	}
@@ -102,6 +103,9 @@ public:
 
 
 		SetMuModelsLocalCalcLighteningCompleted();
+		
+
+		int MU_THREADS = lc_global_data()->getMaxThreads();
 
 		// Light references
 		u32	stride			= inlc_global_data()->mu_refs().size()/MU_THREADS;
@@ -121,13 +125,14 @@ void	run_mu_base( bool net )
 {
 	
 	mu_base.start				(xr_new<CMUThread> (0));
+	mu_base.wait(500);
+	mu_secondary.wait(500);
 }
 
 void	wait_mu_base_thread		()
 {
-	mu_base.wait				(500);
 }
 void	wait_mu_secondary_thread	()
 {
-	mu_secondary.wait			(500);
+
 }

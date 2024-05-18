@@ -55,6 +55,40 @@ private:
 		bool							b_vert_not_register;
 public:
 
+	bool SkipInvalid;
+	bool SkipWeld;
+
+	int MaxThreads;
+	int MaxSamples;
+	int MaxMUSamples;
+	float MaxPixels;
+
+// Getter 
+
+	bool getSkipInvalid() { return SkipInvalid; }
+	bool getSkipWeld() { return SkipWeld; }
+
+	int  getMaxThreads() { return MaxThreads; }
+	int  getMaxSamples() { return MaxSamples; }
+	
+	int  getMaxMUSamples() { return MaxMUSamples; }
+	int  getPixelPerMetter() { return MaxPixels; }
+	
+
+// Setter
+
+	void  setSkipInvalid(bool val) { SkipInvalid = val; }
+	void  setSkipWeld(bool val) { SkipWeld = val; }
+	
+	void  setMaxThreads(int val) { MaxThreads = val; }
+	void  setMaxSamples(int val) { MaxSamples = val; }
+
+	void  setMaxMUSamples(int val) { MaxMUSamples = val; }
+	void  setPixelPerMetter(int val) { MaxPixels = val; }
+
+
+
+
 public:
 									xrLC_GlobalData	();//:_RCAST_Model (0), _b_nosun(false),_gl_linear(false){}
 									~xrLC_GlobalData();

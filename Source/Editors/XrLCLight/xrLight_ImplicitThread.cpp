@@ -27,14 +27,14 @@ void	ImplicitThread ::	Execute	()
 	}
 
 
+#include "xrLC_GlobalData.h"
 
-#define	NUM_THREADS	8
-void RunImplicitMultithread(ImplicitDeflector& defl)
+ void RunImplicitMultithread(ImplicitDeflector& defl)
 {
 		// Start threads
 		CThreadManager			tmanager;
-		u32	stride				= defl.Height()/NUM_THREADS;
-		for (u32 thID=0; thID<NUM_THREADS; thID++)
+		u32	stride				= defl.Height() / lc_global_data()->getMaxThreads();
+		for (u32 thID=0; thID < lc_global_data()->getMaxThreads(); thID++)
 			tmanager.start		(xr_new<ImplicitThread> (thID,&defl,thID*stride,thID*stride+stride));
 		tmanager.wait			();
 }

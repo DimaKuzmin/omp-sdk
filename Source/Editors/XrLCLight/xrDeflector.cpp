@@ -318,8 +318,8 @@ void CDeflector::L_Calculate(CDB::COLLIDER* DB, base_lighting* LightsSelected, H
 		}
 
 		// Calculate
-		R_ASSERT		(lm.width	<=(c_LMAP_size-2*BORDER));
-		R_ASSERT		(lm.height	<=(c_LMAP_size-2*BORDER));
+		R_ASSERT		(lm.width	<=(GetLmapSize()-2*BORDER));
+		R_ASSERT		(lm.height	<=(GetLmapSize()-2*BORDER));
 		lm.create		(lm.width,lm.height);
 		L_Direct		(DB,LightsSelected,H);
 	} catch (...)

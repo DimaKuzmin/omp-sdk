@@ -41,6 +41,16 @@ void Help()
 
 typedef int __cdecl xrOptions(b_params* params, u32 version, bool bRunBuild);
 
+int getValueFromCMD(LPCSTR cmd, LPCSTR param)
+{
+	int Value = 0;
+	if (const char* str = strstr(cmd, param))
+	{
+		Value = atoi(str + xr_strlen(param));
+	}
+	return Value;
+}
+
 void Startup(LPSTR     lpCmdLine)
 {
 	
@@ -57,27 +67,15 @@ void Startup(LPSTR     lpCmdLine)
 	if (strstr(cmd,"-noise"))							g_build_options.b_noise			= TRUE;
 	if (strstr(cmd,"-net"))								g_build_options.b_net_light		= TRUE;
 	VERIFY( lc_global_data() );
-	lc_global_data()->b_nosun_set						( !!strstr(cmd,"-nosun") );
-	//if (strstr(cmd,"-nosun"))							b_nosun			= TRUE;
-	
-	// Give a LOG-thread a chance to startup
-	//_set_sbh_threshold(1920);
-	InitCommonControls		();
+
+ 	// Give a LOG-thread a chance to startup
+ 	InitCommonControls		();
 	thread_spawn			(logThread, "log-update",	1024*1024,0);
 	Sleep					(150);
 	
 	// Faster FPU 
 	SetPriorityClass		(GetCurrentProcess(),NORMAL_PRIORITY_CLASS);
-
-	/*
-	u32	dwMin			= 1800*(1024*1024);
-	u32	dwMax			= 1900*(1024*1024);
-	if (0==SetProcessWorkingSetSize(GetCurrentProcess(),dwMin,dwMax))
-	{
-		clMsg("*** Failed to expand working set");
-	};
-	*/
-	
+ 
 	// Load project
 	name[0]=0;				sscanf(strstr(cmd,"-f")+2,"%s",name);
 
@@ -107,29 +105,52 @@ void Startup(LPSTR     lpCmdLine)
 
 	// Header
 	b_params				Params;
-	F->r_chunk			(EB_Parameters,&Params);
+	F->r_chunk			(EB_Parameters,&Params); 
 
-	// Show options if needed
-	if (bModifyOptions)		
-	{
-		Phase		("Project options...");
-		HMODULE		L = LoadLibrary		("xrLC_Options.dll");
-		void*		P = GetProcAddress	(L,"_frmScenePropertiesRun");
-		R_ASSERT	(P);
-		xrOptions*	O = (xrOptions*)P;
-		int			R = O(&Params,version,false);
-		FreeLibrary	(L);
-		if (R==2)	{
-			ExitProcess(0);
-		}
-	}
+
 	
 	// Conversion
 	Phase					("Converting data structures...");
 	pBuild					= xr_new<CBuild>();
 	pBuild->Load			(Params,*F);
 	FS.r_close				(F);
+
+
+	lc_global_data()->b_nosun_set(!!strstr(cmd, "-nosun"));
+ 	lc_global_data()->setSkipInvalid(strstr(cmd, "-skipinvalid"));
+	lc_global_data()->setSkipWeld(strstr(cmd, "-skip_weld"));
+
+	int val = getValueFromCMD(cmd, "-samples");
+	if (val != 0)
+	{
+		lc_global_data()->setMaxSamples(val);
+		g_params().m_lm_jitter_samples = lc_global_data()->getMaxSamples();
+	}
+
+	val = getValueFromCMD(cmd, "-musamples");
+	if (val  != 0)
+		lc_global_data()->setMaxMUSamples(val);
+
+	val = getValueFromCMD(cmd, "-thread");
+	if (val != 0)
+		lc_global_data()->setMaxThreads(val);
+	else lc_global_data()->setMaxThreads(4);
+
+	val = getValueFromCMD(cmd, "-pxpm");
+	if (val != 0)
+	{
+		lc_global_data()->setPixelPerMetter(val);
+		g_params().m_lm_pixels_per_meter = lc_global_data()->getPixelPerMetter();
+	}
+ 
 	
+	
+	Msg("Build Params: Sample: %d, PXPM: %f, angle: %f, weld: %f",
+		g_params().m_lm_jitter_samples, g_params().m_lm_pixels_per_meter, g_params().m_sm_angle, g_params().m_weld_distance);
+		
+	Msg("Build Argumets: Threads: %d, SkipInvalid: %d, SkipWeld: %d", 
+		lc_global_data()->getMaxThreads(), lc_global_data()->getSkipInvalid(), lc_global_data()->getSkipWeld());
+
 	// Call for builder
 	string_path				lfn;
 	CTimer	dwStartupTime;	dwStartupTime.Start();

@@ -79,22 +79,24 @@ void CBuild::PreOptimize()
 		R_ASSERT		(ix<=HDIM_X && iy<=HDIM_Y && iz<=HDIM_Z);
 		vecVertex &H	= *(HASH[ix][iy][iz]);
 
-		// Search similar vertices in hash table
-		for (vecVertexIt T=H.begin(); T!=H.end(); T++)
+		if (!lc_global_data()->getSkipWeld())
 		{
-			Vertex *pBase = *T;
-			if (pBase->similar(*pTest,g_params().m_weld_distance)) 
+			// Search similar vertices in hash table
+			for (vecVertexIt T = H.begin(); T != H.end(); T++)
 			{
-				while(pTest->m_adjacents.size())	
-					pTest->m_adjacents.front()->VReplace(pTest, pBase);
+				Vertex* pBase = *T;
+				if (pBase->similar(*pTest, g_params().m_weld_distance))
+				{
+					while (pTest->m_adjacents.size())
+						pTest->m_adjacents.front()->VReplace(pTest, pBase);
 
-				lc_global_data()->destroy_vertex(lc_global_data()->g_vertices()[it]);
-				Vremoved			+= 1;
-				pTest				= NULL;
-				break;
+					lc_global_data()->destroy_vertex(lc_global_data()->g_vertices()[it]);
+					Vremoved += 1;
+					pTest = NULL;
+					break;
+				}
 			}
 		}
-		
 		// If we get here - there is no similar vertices - register in hash tables
 		if (pTest) 
 		{
@@ -134,7 +136,8 @@ void CBuild::PreOptimize()
 	if (InvalideFaces())	
 	{
 		err_save		();
-		if (strstr(Core.Params, "-no_invalidefaces") == 0)
+		
+		if (!lc_global_data()->getSkipInvalid())
 			Debug.fatal		(DEBUG_INFO,"* FATAL: %d invalid faces. Compilation aborted",InvalideFaces());
 	}
 

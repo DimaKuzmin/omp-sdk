@@ -32,6 +32,10 @@
 //#define COLLECT_EXECUTION_STATS
 
 #pragma warning (disable:4661)
+#pragma warning (disable:4995)
+#pragma warning (disable:4996)
+
+
 #include "xrLC_Light.h"
 void __cdecl	clMsg( const char *format, ...);
 void __cdecl	clLog( const char *format, ...);
