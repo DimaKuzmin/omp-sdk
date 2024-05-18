@@ -186,6 +186,39 @@ public:
 	float			rRange;
 	float			rRange2;
 
+	MODEL*			MDL;
+
+	OpcodeContext* context_opcode = 0;
+	bool		   continue_work = true;
+
+
+	ICF void			_init(COLLIDER* CL, CDB::MODEL* model, const Fvector& C, const Fvector& D, float R)
+	{
+		dest = CL;
+		tris = model->get_tris();
+		verts = model->get_verts();
+
+		MDL = model;
+
+		ray.pos.set(C);
+		ray.inv_dir.set(1.f, 1.f, 1.f).div(D);
+		ray.fwd_dir.set(D);
+		rRange = R;
+		rRange2 = R * R;
+
+		if (!bUseSSE)
+		{
+			// for FPU - zero out inf
+			if (_abs(D.x) > flt_eps) {}
+			else ray.inv_dir.x = 0;
+			if (_abs(D.y) > flt_eps) {}
+			else ray.inv_dir.y = 0;
+			if (_abs(D.z) > flt_eps) {}
+			else ray.inv_dir.z = 0;
+		}
+	}
+
+
 	IC void			_init		(COLLIDER* CL, Fvector* V, TRI* T, const Fvector& C, const Fvector& D, float R)
 	{
 		dest			= CL;
@@ -313,6 +346,22 @@ public:
 				rRange2		= r*r;
 			}
 		} else {
+
+			if (context_opcode != nullptr)
+			{
+				// OpcodeArgs  data;
+				context_opcode->result->hit_struct.u = u;
+				context_opcode->result->hit_struct.v = v;
+				context_opcode->result->hit_struct.prim = prim;
+				context_opcode->result->hit_struct.dist = r;
+
+				context_opcode->filter(context_opcode->result);
+
+				continue_work = context_opcode->result->valid;
+
+				return;
+			}
+
 			RESULT& R	= dest->r_add();
 			R.id		= prim;
 			R.range		= r;
@@ -326,6 +375,9 @@ public:
 	}
 	void			_stab		(const AABBNoLeafNode* node)
 	{
+		if (!continue_work)
+			return;
+
 		// Should help
 		_mm_prefetch( (char *) node->GetNeg() , _MM_HINT_NTA );
 
@@ -463,3 +515,20 @@ void	COLLIDER::ray_query	(const MODEL *m_def, const Fvector& r_start,  const Fve
 	}
 }
 
+
+ICF void CDB::COLLIDER::rayTrace1(OpcodeContext* context)
+{
+	MODEL* MDL = const_cast<MODEL*>((MODEL*)context->result->MDL);
+
+	MDL->syncronize();
+
+	// Get nodes
+	const AABBNoLeafTree* T = (const AABBNoLeafTree*)MDL->tree->GetTree();
+	const AABBNoLeafNode* N = T->GetNodes();
+	r_clear();
+
+	ray_collider<true, false, false, false>	RC;
+	RC.context_opcode = context;
+	RC._init(this, MDL, context->r_start, context->r_dir, context->r_range);
+	RC._stab(N);
+}

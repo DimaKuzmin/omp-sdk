@@ -355,6 +355,8 @@ namespace CDB
 		//		R_ASSERT(ix<=clpMX && iy<=clpMY && iz<=clpMZ);
 		clamp(ix,(u32)0,clpMX);	clamp(iy,(u32)0,clpMY);	clamp(iz,(u32)0,clpMZ);
 
+		// WELD TO PTR IF SIMULAR
+		if (false)
 		{
 			DWORDList* vl;
 			vl = &(VM[ix][iy][iz]);
@@ -364,6 +366,7 @@ namespace CDB
 					break;
 				}
 		}
+
 		if (0xffffffff==P)
 		{
 			P = verts.size();

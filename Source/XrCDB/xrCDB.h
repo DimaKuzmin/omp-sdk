@@ -26,6 +26,39 @@ namespace Opcode {
 	class AABBNoLeafNode;
 };
 
+
+struct OpcodeArgs
+{
+	struct Hit
+	{
+		float dist;
+		float u, v;
+		u64 prim;
+	} hit_struct;
+
+	Fvector pos;
+	bool valid = 1;
+	float energy;
+
+	//int count = 0;
+	void* MDL;
+	void* skip;
+	void* Light;
+};
+
+typedef void (*OpcodeFilterFunction)(OpcodeArgs* args);
+
+struct OpcodeContext
+{
+	OpcodeFilterFunction filter;
+	OpcodeArgs* result;
+
+	Fvector r_start;
+	Fvector r_dir;
+	float r_range;
+};
+
+
 #pragma pack(push,4)
 namespace CDB
 {
@@ -147,6 +180,9 @@ namespace CDB
 	public:
 		COLLIDER		();
 		~COLLIDER		();
+
+		ICF void		rayTrace1(OpcodeContext* context);
+
 
 		ICF void		ray_options		(u32 f)	{	ray_mode = f;		}
 		void			ray_query		(const MODEL *m_def, const Fvector& r_start,  const Fvector& r_dir, float r_range = 10000.f);
