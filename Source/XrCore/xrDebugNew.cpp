@@ -5,7 +5,7 @@
 #include "os_clipboard.h"
 
 #include <sal.h>
-#include "directx\dxerr.h"
+// #include "directx\dxerr.h"
 
 #pragma warning(push)
 #pragma warning(disable:4995)
@@ -235,7 +235,7 @@ LPCSTR xrDebug::error2string	(long code)
 	LPCSTR				result	= 0;
 	static	string1024	desc_storage;
 
-	result				= DXGetErrorDescription	(code);
+//	result				= DXGetErrorDescription	(code);
 	if (0==result)
 	{
 		FormatMessage	(FORMAT_MESSAGE_FROM_SYSTEM,0,code,0,desc_storage,sizeof(desc_storage)-1,0);

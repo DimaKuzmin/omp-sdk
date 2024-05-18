@@ -3,7 +3,7 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
-    <OutDir>$(SolutionDir)..\Bin\$(Platform)\$(Configuration)\</OutDir>
+    <OutDir>A:\STALKER\X-Ray_CoP_SDK\editors\Bin\x64\omp</OutDir>
     <IntDir>$(SolutionDir)..\Intermediate\$(Platform)\$(Configuration)\$(ProjectName)</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup>
@@ -20,6 +20,7 @@
       <ExceptionHandling>Sync</ExceptionHandling>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <LanguageStandard>stdcpp14</LanguageStandard>
+      <DisableSpecificWarnings>4995;4996</DisableSpecificWarnings>
     </ClCompile>
     <Lib>
       <OutputFile>$(SolutionDir)..\Lib\$(Platform)\$(Configuration)\$(TargetName)$(TargetExt)</OutputFile>

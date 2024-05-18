@@ -25,22 +25,41 @@ extern "C"
 #include "StbImage/stb_image_write.h"
 bool RedImage::LoadFromFile(const char * str)
 {
-	FILE*file = fopen(str, "rb");
-	if (!file)
-		return false;
-	fseek(file, 0, SEEK_END);
-	u32 Size = ftell(file);
-	fseek(file, 0, SEEK_SET);
-	u8* Data = red_alloc<u8>(Size);
-	if (!fread(Data, Size, 1, file))
+	bool return_value = false;
+	try
 	{
-		fclose(file);
-		return false;
+		FILE* file = fopen(str, "rb");
+		if (!file)
+		{
+			return_value = false;
+		}
+		else
+		{
+			fseek(file, 0, SEEK_END);
+			u32 Size = ftell(file);
+			fseek(file, 0, SEEK_SET);
+			u8* Data = red_alloc<u8>(Size);
+			if (!fread(Data, Size, 1, file))
+			{
+				fclose(file);
+				return_value = false;
+			}
+			else
+			{
+				LoadFromMemory(Data, Size);
+				red_free(Data);
+				fclose(file);
+			}
+		}
+		
+		return_value = true;
 	}
-	LoadFromMemory(Data, Size);
-	red_free(Data);
-	fclose(file);
-	return true;
+	catch (...)
+	{
+		return_value = false;
+	}
+
+	return return_value;
 }
 
 bool RedImage::LoadFromMemory(void* pointer, size_t size)

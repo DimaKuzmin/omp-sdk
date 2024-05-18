@@ -37,9 +37,6 @@
     <Filter Include="%2a%2a%2a COMPILER %2a%2a%2a\Deflector">
       <UniqueIdentifier>{f4575153-4953-466e-8981-259537898832}</UniqueIdentifier>
     </Filter>
-    <Filter Include="%2a%2a%2a COMPILER %2a%2a%2a\XRAY">
-      <UniqueIdentifier>{957e4dc5-9e76-42a5-8100-8578f2c50460}</UniqueIdentifier>
-    </Filter>
     <Filter Include="%2a%2a%2a COMPILER %2a%2a%2a\Internal">
       <UniqueIdentifier>{abbe1427-5407-45cb-82c5-10e7b2f33f72}</UniqueIdentifier>
     </Filter>
@@ -54,6 +51,9 @@
     </Filter>
     <Filter Include="%2a%2a%2a COMPILER %2a%2a%2a\net">
       <UniqueIdentifier>{b85a98b8-2561-448b-b65a-490577f760fc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="%2a%2a%2a COMPILER %2a%2a%2a\XRAY">
+      <UniqueIdentifier>{957e4dc5-9e76-42a5-8100-8578f2c50460}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -254,9 +254,6 @@
       <Filter>%2a%2a%2a COMPILER %2a%2a%2a</Filter>
     </ClCompile>
     <ClCompile Include="xrPhase_MergeLM.cpp">
-      <Filter>%2a%2a%2a COMPILER %2a%2a%2a</Filter>
-    </ClCompile>
-    <ClCompile Include="xrPhase_MergeLM_Surface.cpp">
       <Filter>%2a%2a%2a COMPILER %2a%2a%2a</Filter>
     </ClCompile>
     <ClCompile Include="xrPhase_ResolveMaterials.cpp">

@@ -8,6 +8,7 @@ namespace RedImageTool
 	{
 		if (!size)
 		{
+			if (pointer != nullptr)
 			free(pointer);
 			return nullptr;
 		}
