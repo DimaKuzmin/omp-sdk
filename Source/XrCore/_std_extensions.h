@@ -64,7 +64,7 @@ IC int xr_sprintf(char* dest, size_t sizeOfBuffer, const char* format, ...)
 {
 	va_list 	mark;
 	va_start	(mark, format );
-	int sz		= _vsnprintf(dest, sizeOfBuffer, format, mark );
+	int sz		= vsnprintf(dest, sizeOfBuffer, format, mark );
     dest		[sizeOfBuffer-1]=0;
     va_end		(mark);
     return 		sz;
