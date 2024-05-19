@@ -95,8 +95,8 @@ extern bool CanUseEmbree;
 
 float rayTraceCheck(CDB::COLLIDER* DB, CDB::MODEL* MDL, R_Light& L, Fvector& P, Fvector& D, float R, Face* skip)
 {
-//	if (CanUseEmbree)
-//	return RaytraceEmbreeProcess(MDL, L, P, D, R, skip);
+	if (CanUseEmbree)
+		return RaytraceEmbreeProcess(MDL, L, P, D, R, skip);
 
 
 	R_ASSERT(DB);

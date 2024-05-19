@@ -44,13 +44,13 @@ void SetMuModelsLocalCalcLighteningCompleted()
 	mu_models_local_calc_lightening_wait_lock.Leave();
 }
 
-/*
-class CMULight	: public CThread
+
+class CMULightSplit	: public CThread
 {
 	u32			low;
 	u32			high;
 public:
-	CMULight	(u32 ID, u32 _low, u32 _high) : CThread(ID)	{	thMessages	= FALSE; low=_low; high=_high;	}
+	CMULightSplit(u32 ID, u32 _low, u32 _high) : CThread(ID)	{	thMessages	= FALSE; low=_low; high=_high;	}
 
 	virtual void	Execute	()
 	{
@@ -68,12 +68,11 @@ public:
 		}
 	}
 };
- */
+ 
 // se7kills 
+#include <atomic>
 
-
-xrCriticalSection cs;
-int ThreadWorkMU = 0;
+std::atomic<int> ThreadWorkMU = 0;
 
 class CMULight	: public CThread
 {
@@ -87,13 +86,12 @@ public:
 		Sleep				(0);
 
 		// Light references
-		//for (u32 m=low; m<high; m++)
-		while (true)
+ 		while (true)
 		{
-			cs.Enter();
-			int m = ThreadWorkMU;
-			ThreadWorkMU++;
-			cs.Leave();
+			//csMUModels.Enter();
+			int m = ThreadWorkMU.load();
+			ThreadWorkMU.fetch_add(1);
+			//csMUModels.Leave();
 
 			if (m >= inlc_global_data()->mu_refs().size())
   				break;
@@ -147,12 +145,14 @@ public:
 
 		SetMuModelsLocalCalcLighteningCompleted();
 		
-
 		int MU_THREADS = lc_global_data()->getMaxThreads();
-		
-		ThreadWorkMU = 0;
+		 
+		 
+		ThreadWorkMU.store(0);
  		for (u32 thID = 0; thID < MU_THREADS; thID++)
 			mu_secondary.start(xr_new<CMULight>(thID) );
+		 
+
 
 		/*
 		// Light references
@@ -162,18 +162,17 @@ public:
 		get_intervals( MU_THREADS, inlc_global_data()->mu_refs().size(), threads, stride, last );
 
 		for (u32 thID=0; thID<threads; thID++)
-			mu_secondary.start	( xr_new<CMULight> (thID,thID*stride,thID*stride + stride ) );
+			mu_secondary.start	( xr_new<CMULightSplit> (thID,thID*stride,thID*stride + stride ) );
 		if(last > 0)
-			mu_secondary.start	( xr_new<CMULight> (threads,threads*stride,threads*stride + last ) );
-		*/
+			mu_secondary.start	( xr_new<CMULightSplit> (threads,threads*stride,threads*stride + last ) );
+		 */
 	}
 };
 
 
 void	run_mu_base( bool net )
 {
-	
-	mu_base.start				(xr_new<CMUThread> (0));
+ 	mu_base.start				(xr_new<CMUThread> (0));
 	mu_base.wait(500);
 	mu_secondary.wait(500);
 }

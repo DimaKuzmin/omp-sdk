@@ -165,15 +165,6 @@ void SetRay1Hit(RTCRayHit& rayhit, float range = 0)
 // 1 - 8 - 32 - 64 - 96 - 128 - 256 - 512 - 1024
 //#define MAX_HITS 1024 
 
-
-struct DataFaceGlobalE
-{
-	base_Face* face = 0;
-	RTCRayHit* rayhit = 0;
-	float energy;
-	float tfar;
-};
-
 struct RayQueryContext
 {
 	RTCRayQueryContext context;
@@ -189,8 +180,6 @@ struct RayQueryContext
 	unsigned int LastPrimitive = 0;
 	float last_far = 0.0f;
 	int hits = 0;
-	// Debuging Vector
-	// xr_vector<DataFaceGlobalE> hits;
 };
 
 
@@ -290,14 +279,10 @@ FORCEINLINE void FilterIntersectionOne(const struct RTCFilterFunctionNArguments*
 		light.tri[1].set(ctxt->model->get_verts()[clT->verts[1]]);
 		light.tri[2].set(ctxt->model->get_verts()[clT->verts[2]]);
 
-		//if (ray->tfar > 0.3f)
-		//if (ctxt->last_far - ray->tfar > 0.2f)
-		{
-			args->valid[0] = -1;
-			ctxt->energy = 0;
-			ctxt->Ended = 1;
-		}
-
+ 		args->valid[0] = -1;
+		ctxt->energy = 0;
+		ctxt->Ended = 1;
+ 
 		return;
 	}
 
@@ -313,8 +298,7 @@ FORCEINLINE void FilterIntersectionOne(const struct RTCFilterFunctionNArguments*
 		return;
 	}
 
-
-	ctxt->hits++;
+ 	ctxt->hits++;
 
 
 	// barycentric coords
@@ -390,7 +374,7 @@ float RaytraceEmbreeProcess(CDB::MODEL* MDL, R_Light& L, Fvector& P, Fvector& N,
 	ray.pos = P;
 	ray.dir = N;
 	ray.tmax = range;
-	ray.tmin = TNearParram;
+	ray.tmin = 3;
 
 	RatraceOneRay(ray, data);
 
@@ -615,9 +599,7 @@ void GetEmbreeDeviceProperty(LPCSTR msg, RTCDevice& device, RTCDeviceProperty pr
 
 void IntelEmbereLOAD()
 {
-
-
-	std::string config;
+ 	std::string config;
 	bool avx = true; // build_args->use_avx;
 	bool sse = false; //build_args->use_sse;
 
