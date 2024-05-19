@@ -20,26 +20,17 @@ static BOOL 				no_log			= TRUE;
 xr_vector<shared_str>*		LogFile			= NULL;
 static LogCallback			LogCB			= 0;
 
+IWriter* writer_log = 0;
+
 void FlushLog			()
 {
-	if (!no_log){
-		logCS.Enter			();
-		IWriter *f			= FS.w_open(logFName);
-        if (f) {
-            for (u32 it=0; it<LogFile->size(); it++)	{
-				LPCSTR		s	= *((*LogFile)[it]);
-				f->w_string	(s?s:"");
-			}
-            FS.w_close		(f);
-        }
-		logCS.Leave			();
-    }
+	 
 }
 
 void AddOne				(const char *split) 
 {
-	if(!LogFile)		
-						return;
+//	if(!LogFile)		
+//		return;
 
 	logCS.Enter			();
 
@@ -52,7 +43,12 @@ void AddOne				(const char *split)
 	{
 		shared_str			temp = shared_str(split);
 //		DUMP_PHASE;
+		
+		if (LogFile)
 		LogFile->push_back	(temp);
+
+		if (writer_log)
+			writer_log->w_string(temp.c_str());
 	}
 
 	//exec CallBack
@@ -178,6 +174,17 @@ void InitLog()
 	LogFile->reserve	(1000);
 }
 
+void ThreadUpdate()
+{
+	while (true)
+	{
+		writer_log->flush();
+		Sleep(1000);
+	}
+}
+
+#include <thread>
+
 void CreateLog			(BOOL nl)
 {
     no_log				= nl;
@@ -192,6 +199,20 @@ void CreateLog			(BOOL nl)
         }
         FS.w_close		(f);
     }
+
+	//if (writer_log == 0)
+	{
+		writer_log = FS.w_open(logFName);
+
+		std::thread* th = new std::thread(ThreadUpdate);
+		th->detach();
+
+
+		for (auto str : *LogFile)
+		{
+			writer_log->w_string(str.c_str());
+		}
+	}
 }
 
 void CloseLog(void)
@@ -199,4 +220,7 @@ void CloseLog(void)
 	FlushLog		();
  	LogFile->clear	();
 	xr_delete		(LogFile);
+
+	writer_log->flush();
+	FS.w_close(writer_log);
 }

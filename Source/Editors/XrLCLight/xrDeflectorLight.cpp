@@ -88,8 +88,17 @@ void FilterFunction(OpcodeArgs* args)
 		args->valid = false;
 };
 
+
+float RaytraceEmbreeProcess(CDB::MODEL* MDL, R_Light& L, Fvector& P, Fvector& N, float range, Face* skip);
+
+extern bool CanUseEmbree;
+
 float rayTraceCheck(CDB::COLLIDER* DB, CDB::MODEL* MDL, R_Light& L, Fvector& P, Fvector& D, float R, Face* skip)
 {
+//	if (CanUseEmbree)
+//	return RaytraceEmbreeProcess(MDL, L, P, D, R, skip);
+
+
 	R_ASSERT(DB);
 
 	// 1. Check cached polygon	 

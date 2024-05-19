@@ -148,8 +148,7 @@ void CBuild::Light()
 	ImplicitNetWait();
 	WaitMuModelsLocalCalcLightening();
 	lc_net::get_task_manager().wait_all();
-	//	get_task_manager().wait_all();
-	lc_net::get_task_manager().release();
+ 	lc_net::get_task_manager().release();
 //
 	//****************************************** Merge LMAPS
 	{
@@ -159,6 +158,10 @@ void CBuild::Light()
 
 		xrPhase_MergeLM	();
 	}
+
+	
+	void XRLC_LIGHT_API IntelEmbereUNLOAD();
+	IntelEmbereUNLOAD();
 }
 
 void CBuild::LightVertex	()

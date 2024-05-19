@@ -69,6 +69,9 @@
     <Filter Include="do_light">
       <UniqueIdentifier>{56804a38-c24a-4fa0-a5e2-617c53a49bbc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Light\Embree">
+      <UniqueIdentifier>{3fd17fcf-5e71-4bfb-8be2-03b444b0b702}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="_d3d_extensions.h">
@@ -324,6 +327,9 @@
       <Filter>do_light</Filter>
     </ClInclude>
     <ClInclude Include="..\Shader_xrLC.h" />
+    <ClInclude Include="xrLight_Embree.h">
+      <Filter>Light\Embree</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -580,6 +586,12 @@
     </ClCompile>
     <ClCompile Include="..\Public\hxGridInterface.cpp">
       <Filter>kernel</Filter>
+    </ClCompile>
+    <ClCompile Include="EmbreeDataStorage.h">
+      <Filter>Light\Embree</Filter>
+    </ClCompile>
+    <ClCompile Include="xrLight_Embree.cpp">
+      <Filter>Light\Embree</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -92,14 +92,12 @@ public:
 		{
 			cs.Enter();
 			int m = ThreadWorkMU;
-			if (m >= inlc_global_data()->mu_refs().size())
-			{
-				cs.Leave();
-				break;
-			}
 			ThreadWorkMU++;
 			cs.Leave();
 
+			if (m >= inlc_global_data()->mu_refs().size())
+  				break;
+ 
 
 			inlc_global_data()->mu_refs()[m]->calc_lighting	();
 			clMsg("Process Ref: %s", inlc_global_data()->mu_refs()[m]->model->m_name.c_str());
@@ -108,6 +106,7 @@ public:
 	}
 };
  
+extern bool CanUseEmbree = false;
 
 	//void LC_WaitRefModelsNet();
 class CMUThread : public CThread
@@ -136,12 +135,15 @@ public:
 			//lc_net::WaitRefModelsNet();
 		} 
 		
+		CanUseEmbree = false;
+
 		for (u32 m=0; m<inlc_global_data()->mu_models().size(); m++)
 		{
 			inlc_global_data()->mu_models()[m]->calc_materials();
 			inlc_global_data()->mu_models()[m]->calc_lighting	();
 		}
 
+		CanUseEmbree = true;
 
 		SetMuModelsLocalCalcLighteningCompleted();
 		

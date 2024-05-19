@@ -147,6 +147,9 @@ virtual	void Execute()
 			ThreadIDWorkAHT++;
 			csAdaptive.Leave();
 
+			if (VID >= lc_global_data()->g_vertices().size())
+				break;
+
 			Vertex*		V		= verts[VID];
 			
 			R_ASSERT( V );
@@ -190,6 +193,14 @@ void CBuild::xrPhase_AdaptiveHT	()
 		Status						("Precalculating : base hemisphere ...");
 		mem_Compact					();
 		Light_prepare				();
+
+
+
+	//	void XRLC_LIGHT_API IntelEmbereUNLOAD();
+		void XRLC_LIGHT_API IntelEmbereLOAD();
+
+		IntelEmbereLOAD();
+
 
 		// calc approximate normals for vertices + base lighting
 		//for (u32 vit=0; vit<lc_global_data()->g_vertices().size(); vit++)	
