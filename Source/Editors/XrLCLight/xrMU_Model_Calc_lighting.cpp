@@ -49,7 +49,7 @@ var _x	= var(x);
 //-----------------------------------------------------------------------
 void xrMU_Model::calc_lighting	(xr_vector<base_color>& dest, const Fmatrix& xform, CDB::MODEL* MDL, base_lighting& lights, u32 flags)
 {
-	// trans-map
+ 	// trans-map
 	typedef	xr_multimap<float,v_vertices>	mapVert;
 	typedef	mapVert::iterator				mapVertIt;
 	mapVert									g_trans;
@@ -71,34 +71,38 @@ void xrMU_Model::calc_lighting	(xr_vector<base_color>& dest, const Fmatrix& xfor
 	DB.ray_options				(0);
 
 	// Disable faces if needed
-	/*
-	BOOL bDisableFaces			= flags&LP_UseFaceDisable;
-	if	(bDisableFaces)
-		for (I=0; I<m_faces.size(); I++)	m_faces[I]->flags.bDisableShadowCast	= true;
-	*/
+	
+	// Создаем безопасный список Вертексов
+	xr_vector<_vertex> ColorVertexes(m_vertices.size());
 
-	// Perform lighting
-	for (I = 0; I<m_vertices.size(); I++)
+	for (auto i = 0; i <  m_vertices.size(); i++)
 	{
-		_vertex*	V			= m_vertices[I];
+		ColorVertexes[i] = *m_vertices[i];
+	}
+	 
+	// Perform lighting
+	for (I = 0; I< ColorVertexes.size(); I++)
+	{
+		// Доступ безопасен 
+		_vertex&	V			= ColorVertexes[I];
 
 		// Get ambient factor
 		float		v_amb		= 0.f;
 		float		v_trans		= 0.f;
-		for (u32 f=0; f<V->m_adjacents.size(); f++)
+		for (u32 f=0; f<V.m_adjacents.size(); f++)
 		{
-			_face*	F			=	V->m_adjacents[f];
+			_face*	F			=	V.m_adjacents[f];
 			v_amb				+=	F->Shader().vert_ambient;
 			v_trans				+=	F->Shader().vert_translucency;
 		}
-		v_amb					/=	float(V->m_adjacents.size());
-		v_trans					/=	float(V->m_adjacents.size());
+		v_amb					/=	float(V.m_adjacents.size());
+		v_trans					/=	float(V.m_adjacents.size());
 		float v_inv				=	1.f-v_amb;
 
 		base_color_c			vC;
 		Fvector					vP,vN;
-		xform.transform_tiny	(vP,V->P);
-		Rxform.transform_dir	(vN,V->N);
+		xform.transform_tiny	(vP,V.P);
+		Rxform.transform_dir	(vN,V.N);
 		exact_normalize			(vN); 
 
 		// multi-sample
@@ -113,12 +117,15 @@ void xrMU_Model::calc_lighting	(xr_vector<base_color>& dest, const Fmatrix& xfor
 		}
 		vC.scale				(n_samples);
 		vC._tmp_				=	v_trans;
+		
+		// НЕ безопастно 
 		if (flags&LP_dont_hemi) ;
 		else					vC.hemi	+=	v_amb;
-		V->C._set				(vC);
+	 
+		V.C._set				(vC);
 
 		// Search
-		const float key			= V->P.x;
+		const float key			= V.P.x;
 		mapVertIt	it			= g_trans.lower_bound	(key);
 		mapVertIt	it2			= it;
 
@@ -134,10 +141,10 @@ void xrMU_Model::calc_lighting	(xr_vector<base_color>& dest, const Fmatrix& xfor
 			v_vertices&	VL		= it->second;
 			_vertex* Front		= VL.front();
 			R_ASSERT			(Front);
-			if (Front->P.similar(V->P,eps))
+			if (Front->P.similar(V.P,eps))
 			{
 				found				= TRUE;
-				VL.push_back		(V);
+				VL.push_back		(&V);
 			}
 		}
 
@@ -145,15 +152,9 @@ void xrMU_Model::calc_lighting	(xr_vector<base_color>& dest, const Fmatrix& xfor
 		if (!found)				{
 			mapVertIt	ins			= g_trans.insert(mk_pair(key,v_vertices()));
 			ins->second.reserve		(32);
-			ins->second.push_back	(V);
+			ins->second.push_back	(&V);
 		}
 	}
-
-	// Enable faces if needed
-	/*
-	if	(bDisableFaces)
-		for (I=0; I<m_faces.size(); I++)	m_faces[I]->flags.bDisableShadowCast	= true;
-	*/
 
 	// Process all groups
 	for (mapVertIt it=g_trans.begin(); it!=g_trans.end(); it++)
@@ -191,13 +192,14 @@ void xrMU_Model::calc_lighting	(xr_vector<base_color>& dest, const Fmatrix& xfor
 	}
 
 	// Transfer colors to destination
-	dest.resize				(m_vertices.size());
-	for (I = 0; I<m_vertices.size(); I++)
+	dest.resize				(ColorVertexes.size());
+	for (I = 0; I< ColorVertexes.size(); I++)
 	{
-		Fvector		ptPos	= m_vertices[I]->P;
-		base_color	ptColor	= m_vertices[I]->C;
+		Fvector		ptPos	= ColorVertexes[I].P;
+		base_color	ptColor	= ColorVertexes[I].C;
 		dest[I]				= ptColor;
 	}
+ 
 }
 
 void xrMU_Model::calc_lighting	()
