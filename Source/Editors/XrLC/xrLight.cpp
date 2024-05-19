@@ -145,11 +145,15 @@ void CBuild::Light()
 //
 	
 
-	ImplicitNetWait();
-	WaitMuModelsLocalCalcLightening();
-	lc_net::get_task_manager().wait_all();
- 	lc_net::get_task_manager().release();
-//
+	//****************************************** Starting MU
+	FPU::m64r();
+	Phase("LIGHT: Starting MU...");
+	mem_Compact();
+	Light_prepare();
+ 	StartMu();
+
+ 	WaitMuModelsLocalCalcLightening();
+ 
 	//****************************************** Merge LMAPS
 	{
 		FPU::m64r		();

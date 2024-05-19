@@ -246,17 +246,6 @@ void CBuild::Run	(LPCSTR P)
 		xrPhase_Radiosity			();
 	}
 
-	//****************************************** Starting MU
-	FPU::m64r					();
-	Phase						("LIGHT: Starting MU...");
-	mem_Compact					();
-	Light_prepare				();
-	if(g_build_options.b_net_light)
-	{
-		lc_global_data()->mu_models_calc_materials();
-		RunNetCompileDataPrepare( );
-	}
-	StartMu						();
 	//****************************************** Resolve materials
 	FPU::m64r					();
 	Phase						("Resolving materials...");
