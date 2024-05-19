@@ -8,7 +8,7 @@
 #include "xrImage_Resampler.h"
 #include "light_point.h"
 #include "xrface.h"
-#include "net_task.h"
+ 
 //const	u32	rms_discard			= 8;
 //extern	BOOL		gl_linear	;
 
@@ -945,23 +945,26 @@ void CDeflector::Light(CDB::COLLIDER* DB, base_lighting* LightsSelected, HASH& H
 
 	// Calculate and fill borders
 	L_Calculate			(DB,LightsSelected,H);
-	if(_net_session && !_net_session->test_connection())
-			 return;
-	for (u32 ref=254; ref>0; ref--) if (!ApplyBorders(layer,ref)) break;
+ 
+	for (u32 ref=254; ref>0; ref--)
+		if (!ApplyBorders(layer,ref))
+			break;
 
 	// Compression
-	try {
+	try 
+	{
 		u32	w,h;
-		if (compress_Zero(layer,rms_zero))	return;		// already with borders
+		if (compress_Zero(layer,rms_zero))	
+			return;		// already with borders
+
 		else if (compress_RMS(layer,rms_shrink,w,h))	
 		{
 			// Reacalculate lightmap at lower resolution
 			layer.create	(w,h);
 			L_Calculate		(DB,LightsSelected,H);
-			if(_net_session && !_net_session->test_connection())
-			 return;
 		}
-	} catch (...)
+	} 
+	catch (...)
 	{
 		clMsg("* ERROR: CDeflector::Light - Compression");
 	}

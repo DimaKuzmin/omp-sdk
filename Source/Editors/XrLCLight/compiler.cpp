@@ -5,7 +5,6 @@
 
 #include "global_calculation_data.h"
 #include "lightthread.h"
-#include "xrLightDoNet.h"
 
 #define NUM_THREADS		3
 
@@ -28,16 +27,13 @@ void	xrLight			()
 	Msg						("%d seconds elapsed.",(start_time.GetElapsed_ms())/1000);
 }
 
-void xrCompileDO( bool net )
+void xrCompileDO()
 {
 	Phase		("Loading level...");
 	gl_data.xrLoad	();
 
 	Phase		("Lighting nodes...");
-	if( net )
-		lc_net::xrNetDOLight();
-	else
-		xrLight		();
+  	xrLight		();
 
 	gl_data.slots_data.Free();
 	

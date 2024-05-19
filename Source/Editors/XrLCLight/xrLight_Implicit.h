@@ -1,7 +1,6 @@
 #ifndef	_XRLIGHT_IMPLICIED_H_
 #define	_XRLIGHT_IMPLICIED_H_
-class INetReader ;
-class net_task_callback;
+
 class ImplicitExecute
 {
 	// Data for this thread
@@ -15,12 +14,7 @@ public:
 	{
 
 	}
-	void		Execute			( net_task_callback *net_callback );
-	void		read			( INetReader	&r );
-	void		write			( IWriter	&w ) const ;
-
-	void		receive_result			( INetReader	&r );
-	void		send_result				( IWriter	&w ) const ;
+	void		Execute			();
 };
 
 

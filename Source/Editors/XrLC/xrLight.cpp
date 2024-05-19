@@ -7,9 +7,6 @@
 #include "../xrLCLight/xrLightVertex.h"
 
 #include "../../xrcore/xrSyncronize.h"
-#include "net.h"
-//#include "../xrLCLight/net_task_manager.h"
-#include "../xrLCLight/lcnet_task_manager.h"
 #include "../xrLCLight/mu_model_light.h"
 xrCriticalSection	task_CS
 #ifdef PROFILE_CRITICAL_SECTIONS
@@ -61,13 +58,7 @@ public:
 		}
 	}
 };
-
-
-
-
-
-
-
+ 
 void	CBuild::LMapsLocal				()
 {
 		FPU::m64r		();
@@ -75,19 +66,11 @@ void	CBuild::LMapsLocal				()
 		mem_Compact		();
 
 		// Randomize deflectors
-#ifndef NET_CMP
-		std::random_shuffle	(lc_global_data()->g_deflectors().begin(),lc_global_data()->g_deflectors().end());
-#endif
-
-#ifndef NET_CMP	
-for(u32 dit = 0; dit<lc_global_data()->g_deflectors().size(); dit++)	
-		task_pool.push_back(dit);
-#else
-		task_pool.push_back(14);
-		task_pool.push_back(16);
-#endif
-		
-
+ 		std::random_shuffle	(lc_global_data()->g_deflectors().begin(),lc_global_data()->g_deflectors().end());
+ 
+		for(u32 dit = 0; dit<lc_global_data()->g_deflectors().size(); dit++)	
+			task_pool.push_back(dit);
+   
 		// Main process (4 threads)
 		Status			("Lighting...");
 		CThreadManager	threads;
@@ -100,28 +83,11 @@ for(u32 dit = 0; dit<lc_global_data()->g_deflectors().size(); dit++)
 
 void	CBuild::LMaps					()
 {
-		//****************************************** Lmaps
+	//****************************************** Lmaps
 	Phase			("LIGHT: LMaps...");
-	//DeflectorsStats ();
-#ifndef NET_CMP
-	if(g_build_options.b_net_light)
-
-		//net_light ();
-		lc_net::net_lightmaps ();
-	else{
-		LMapsLocal();
-	}
-#else
-	create_net_task_manager();
-	get_net_task_manager()->create_global_data_write(pBuild->path);
 	LMapsLocal();
-	get_net_task_manager()->run();
-	destroy_net_task_manager();
-	//net_light ();
-#endif
-
 }
-void XRLC_LIGHT_API ImplicitNetWait();
+
 void CBuild::Light()
 {
 	//****************************************** Implicit
@@ -170,5 +136,5 @@ void CBuild::Light()
 
 void CBuild::LightVertex	()
 {
-	::LightVertex(!!g_build_options.b_net_light);
+	::LightVertex();
 }

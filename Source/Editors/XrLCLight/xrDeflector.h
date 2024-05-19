@@ -5,20 +5,17 @@
 #include "lm_layer.h"
 #include "uv_tri.h"
 #include "../../xrcdb/xrCDB.h"
-#include "serialize.h"
+ 
 #include "xrdeflectordefs.h"
-#include "execute_statistics.h"
+ 
 class  base_lighting;
-class net_task_callback;
-class CDeflector;
-//extern XRLC_LIGHT_API CDeflector*		Deflector		;
-class execute_statistics;
+ class CDeflector;
+ 
 class XRLC_LIGHT_API CDeflector
 {
 
 public:
-	net_task_callback			*_net_session;
-	xr_vector<UVtri>			UVpolys;
+ 	xr_vector<UVtri>			UVpolys;
 	Fvector						normal;
 	lm_layer					layer;
 	Fsphere						Sphere;
@@ -27,8 +24,7 @@ public:
 public:
 
 						CDeflector					();
-//public:
-//						CDeflector					(CDeflector** g_defl)	{ CDeflector(); Deflector = this ;}
+ 
 						~CDeflector					();
 static	CDeflector*		read_create					();	
 
@@ -67,23 +63,9 @@ static	CDeflector*		read_create					();
 	}
 	void	RemapUV				(xr_vector<UVtri>& dest, u32 base_u, u32 base_v, u32 size_u, u32 size_v, u32 lm_u, u32 lm_v, BOOL bRotate);
 	void	RemapUV				(u32 base_u, u32 base_v, u32 size_u, u32 size_v, u32 lm_u, u32 lm_v, BOOL bRotate);
-	void	read				( INetReader	&r );
-	void	write				( IWriter	&w ) const ;
-	
-
-
-
-	void	receive_result		( INetReader	&r );
-	void	send_result			( IWriter	&w ) const ;
-	
+  	
 	bool	similar				( const CDeflector &D, float eps =EPS ) const;
-	
-#ifdef	COLLECT_EXECUTION_STATS
-public:
-			execute_time_statistics	time_stat;
-	void	statistic_log			(  )const;
-
-#endif
+ 
 };
 
 extern XRLC_LIGHT_API void SetLmapSize(int Size);
@@ -108,11 +90,4 @@ extern XRLC_LIGHT_API void		DumpDeflctor	( u32 id );
  
 #define rms_zero	((4+g_params().m_lm_rms_zero)/2)
 #define rms_shrink	((8+g_params().m_lm_rms)/2)
-
-typedef  vector_serialize< t_read<CDeflector,  get_id_standart<CDeflector> > >		tread_deflectors;
-typedef  vector_serialize< t_write<CDeflector, get_id_standart<CDeflector> > >	twrite_deflectors;
-
-extern	tread_deflectors	*read_deflectors	;
-extern	twrite_deflectors	*write_deflectors	;
-
-
+ 

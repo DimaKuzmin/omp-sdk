@@ -6,79 +6,25 @@
 
 #include "tga.h"
 
-
-
-
 #include "light_point.h"
 #include "xrdeflector.h"
 #include "xrLC_GlobalData.h"
 #include "xrface.h"
 #include "xrlight_implicitcalcglobs.h"
-#include "net_task_callback.h"
-
+ 
 #include "../../xrcdb/xrcdb.h"
 
 extern "C" bool __declspec(dllimport)  DXTCompress(LPCSTR out_name, u8* raw_data, u8* normal_map, u32 w, u32 h, u32 pitch, STextureParams* fmt, u32 depth);
 
-
-
 DEF_MAP(Implicit,u32,ImplicitDeflector);
-
-
-
-
-
-
-
-void		ImplicitExecute::read			( INetReader	&r )
-{
-	y_start = r.r_u32();	
-	y_end	= r.r_u32();
-}
-void		ImplicitExecute::write			( IWriter	&w ) const 
-{
-	R_ASSERT( y_start != (u32(-1)) );
-	R_ASSERT( y_end != (u32(-1)) );
-	w.w_u32( y_start );
-	w.w_u32( y_end );
-}
-
+ 
+ 
 ImplicitCalcGlobs cl_globs;
-
-
-void	ImplicitExecute::	receive_result			( INetReader	&r )
-{
-	R_ASSERT( y_start != (u32(-1)) );
-	R_ASSERT( y_end != (u32(-1)) );
-	ImplicitDeflector&		defl	= cl_globs.DATA();
-	for (u32 V=y_start; V<y_end; V++)
-		for (u32 U=0; U<defl.Width(); U++)
-	{
-				
-		r_pod<base_color>( r, defl.Lumel( U, V ) );
-		r_pod<u8>		 ( r, defl.Marker( U, V ) );
-
-	}
-}
-void	ImplicitExecute::	send_result				( IWriter	&w ) const 
-{
-	R_ASSERT( y_start != (u32(-1)) );
-	R_ASSERT( y_end != (u32(-1)) );
-	ImplicitDeflector&		defl	= cl_globs.DATA();
-	for (u32 V=y_start; V<y_end; V++)
-		for (u32 U=0; U<defl.Width(); U++)
-	{
-		w_pod<base_color>( w, defl.Lumel( U, V ) );
-		w_pod<u8>		 ( w, defl.Marker( U, V ) );
-	}
-}
-
-
+ 
 u32 ThreadIDWork = 0;
 xrCriticalSection csImplicit;
 
-
-void	ImplicitExecute::	Execute	( net_task_callback *net_callback )
+void	ImplicitExecute::	Execute	()
 	{
 		R_ASSERT( y_start != (u32(-1)) );
 		R_ASSERT( y_end != (u32(-1)) );
@@ -115,9 +61,7 @@ void	ImplicitExecute::	Execute	( net_task_callback *net_callback )
 
 			for (u32 U=0; U<defl.Width(); U++)
 			{
-				if( net_callback && !net_callback->test_connection() )
-					return;
-				base_color_c	C;
+ 				base_color_c	C;
 				u32				Fcount	= 0;
 				
 				try {
@@ -200,15 +144,13 @@ void ImplicitLightingTreadNetExec( void *p  )
 
 
 
-static xr_vector<u32> not_clear;
-void ImplicitLightingExec(BOOL b_net)
+ void ImplicitLightingExec(BOOL b_net)
 {
 	
 	Implicit		calculator;
 
 	cl_globs.Allocate();
-	not_clear.clear();
-	// Sorting
+ 	// Sorting
 	Status("Sorting faces...");
 	for (vecFaceIt I=inlc_global_data()->g_faces().begin(); I!=inlc_global_data()->g_faces().end(); I++)
 	{
@@ -228,8 +170,7 @@ void ImplicitLightingExec(BOOL b_net)
 			ImpD.texture		= T;
 			ImpD.faces.push_back(F);
 			calculator.insert	(mk_pair(Tid,ImpD));
-			not_clear.push_back	(Tid);
-		} else {
+ 		} else {
 			ImplicitDeflector&	ImpD = it->second;
 			ImpD.faces.push_back(F);
 		}
@@ -249,11 +190,7 @@ void ImplicitLightingExec(BOOL b_net)
 		cl_globs.Initialize( defl );
 
 		ThreadIDWork = 0;
-
-		if(b_net)
-			lc_net::RunImplicitnet( defl, not_clear );
-		else
-			RunImplicitMultithread(defl);
+		RunImplicitMultithread(defl);
 	
 		defl.faces.clear_and_free();
 
@@ -330,7 +267,7 @@ void ImplicitLightingExec(BOOL b_net)
 		}
 		//defl.Deallocate				();
 	}
-	not_clear.clear();
+ 
 	cl_globs.Deallocate();
 	calculator.clear	();
 	if(b_net)

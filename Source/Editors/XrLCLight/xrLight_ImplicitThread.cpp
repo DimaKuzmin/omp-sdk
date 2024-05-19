@@ -23,7 +23,7 @@ void	ImplicitThread ::	Execute	()
 		// Priority
 		SetThreadPriority		(GetCurrentThread(), THREAD_PRIORITY_BELOW_NORMAL);
 		Sleep					(0);
-		execute.Execute(0);
+		execute.Execute();
 	}
 
 

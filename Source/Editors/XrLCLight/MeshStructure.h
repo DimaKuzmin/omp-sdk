@@ -1,19 +1,9 @@
 #ifndef __MESHSTRUCTURE_H__
 #define __MESHSTRUCTURE_H__
 
-//#ifdef MESHSTRUCTURE_EXSPORTS_IMPORTS
+ 
 #	define MESHSTRUCTURE_API XRLC_LIGHT_API
-//#else
-//#	define MESHSTRUCTURE_API 
-//#endif
-
-	//typedef	xr_vector<_vertex*>		v_vertices;
-	//typedef	v_vertices::iterator	v_vertices_it;
-	
-	//typedef v_faces::iterator		v_faces_it;
-	//typedef xr_vector<_subdiv>		v_subdivs;
-	//typedef v_subdivs::iterator		v_subdivs_it;
-//extern	volatile	u32		dwInvalidFaces;
+ 
 class MESHSTRUCTURE_API vector_item
 {
 protected:
@@ -39,23 +29,17 @@ struct MESHSTRUCTURE_API Tface: public DataVertexType::DataFaceType, public vect
 	typedef	Tface<DataVertexType>	type_face;
 //private:
 	type_vertex*	v[3];
-//	u32				m_self_index;
+ 
 public:
-//IC	void			set_index	( u32 idx )		{ m_self_index = idx; }
-//IC	u32				self_index	( )	const		{return m_self_index ;}
+ 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 			Tface	();
 virtual		~Tface	();
-static	Tface* read_create();	
+ 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 	void	Verify		();
 	void 	Failure		();
 	void	OA_Unwarp	(CDeflector * d);
-
-virtual	void	read				( INetReader	&r );
-virtual	void	write				( IWriter	&w )const;
-virtual	void	read_vertices		( INetReader	&r );
-virtual	void	write_vertices		( IWriter	&w )const;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 	IC void				raw_set_vertex( u8 index, type_vertex* _v )
@@ -107,10 +91,12 @@ virtual	void	write_vertices		( IWriter	&w )const;
 		SetVertex(1,V2);
 		SetVertex(2,V3);
 	};
+
 	IC BOOL isDegenerated()
 	{
 		return (v[0]==v[1] || v[0]==v[2] || v[1]==v[2]);
 	};
+
 	IC float	EdgeLen			(int edge)
 	{
 		type_vertex* V1 = v[edge2idx[edge][0]];
@@ -134,8 +120,7 @@ virtual	void	write_vertices		( IWriter	&w )const;
 		if ((v[1]==F.v[0]) && (v[2]==F.v[1]) && (v[0]==F.v[2])) return true;
 		return false;
 	}
-
-
+	 
 	void	CalcNormal	()
 	{
 		Fvector t1,t2;
@@ -231,22 +216,10 @@ struct MESHSTRUCTURE_API Tvertex: public DataVertexType, public vector_item
 
 	typedef typename v_vertices::iterator	v_vertices_it;
 //////////////////////////////////////////////////////////////
-				Tvertex();
-virtual			~Tvertex();
-Tvertex*		CreateCopy_NOADJ( v_vertices& vertises_storage ) const;
-static	Tvertex* read_create();
-
-virtual	void	read		( INetReader	&r );
-virtual	void	write		( IWriter	&w )const;
-
-//////////////////////////////////////////////////////////////
-		void	isolate_pool_clear_read		( INetReader	&r );
-		void	isolate_pool_clear_write	( IWriter	&w )const;
-
-		void	read_adjacents		( INetReader	&r );
-		void	write_adjacents		( IWriter	&w )const;
-///////////////////////////////////////////////////////////////
-	v_faces							m_adjacents;
+					Tvertex();
+	virtual			~Tvertex();
+	Tvertex*		CreateCopy_NOADJ( v_vertices& vertises_storage ) const;
+ 	v_faces			m_adjacents;
 	
 
 

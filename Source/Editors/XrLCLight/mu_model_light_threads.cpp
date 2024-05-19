@@ -9,8 +9,7 @@
 #include "xrlc_globaldata.h"
 
 #include "mu_model_light.h"
-#include "mu_light_net.h"
-
+ 
 //#include "mu_model_face.h"
 
 #include "xrThread.h"
@@ -123,16 +122,6 @@ public:
 		Sleep				(0);
 
 		// Light models
-
-		
-		if(mu_light_net)
-		{
-			lc_net::RunBaseModelsNet( );
-			lc_net::RunRefModelsNet( );
-			return;
-			//lc_net::WaitRefModelsNet();
-		} 
-		
 		CanUseEmbree = false;
 
 		for (u32 m=0; m<inlc_global_data()->mu_models().size(); m++)
@@ -170,7 +159,7 @@ public:
 };
 
 
-void	run_mu_base( bool net )
+void	run_mu_base()
 {
  	mu_base.start				(xr_new<CMUThread> (0));
 	mu_base.wait(500);

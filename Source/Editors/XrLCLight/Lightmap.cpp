@@ -9,7 +9,7 @@
 #include "xrDXTC.h"
 #include "xrImage_Filter.h"
 #include "xrface.h"
-#include "serialize.h"
+ 
 #include "ETextureParams.h"
 extern "C" bool __declspec(dllimport)  DXTCompress(LPCSTR out_name, u8* raw_data, u8* normal_map, u32 w, u32 h, u32 pitch, STextureParams* fmt, u32 depth);
 
@@ -194,18 +194,4 @@ void CLightmap::Save( LPCSTR path )
 
 
 }
-/*
-	lm_layer					lm;
-	b_texture					lm_texture;
-*/
-void	CLightmap::read				( INetReader	&r )
-{
-	lm.read( r );
-	::read(r, lm_texture);
-	
-}
-void	CLightmap::write				( IWriter	&w )const
-{
-	lm.write( w );
-	::write( w, lm_texture );
-}
+ 

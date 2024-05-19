@@ -147,17 +147,15 @@ public:
 		}
 	}
 };
-namespace lc_net{
-void RunLightVertexNet();
-}
+ 
 #define NUM_THREADS			4
-void LightVertex	( bool net )
+void LightVertex	()
 {
 	g_trans				= xr_new<mapVert>	();
 
 	// Start threads, wait, continue --- perform all the work
 	Status				("Calculating...");
-	if( !net )
+ 
 	{
 		CThreadManager		Threads;
 		VLT.init			();
@@ -165,10 +163,8 @@ void LightVertex	( bool net )
 		for (u32 thID=0; thID<NUM_THREADS; thID++)	Threads.start(xr_new<CVertexLightThread>(thID));
 		Threads.wait		();
 		clMsg				("%f seconds",start_time.GetElapsed_sec());
-	} else
-	{
-		lc_net::RunLightVertexNet();
-	}
+	} 
+
 	// Process all groups
 	Status				("Transluenting...");
 	for (mapVertIt it=g_trans->begin(); it!=g_trans->end(); it++)

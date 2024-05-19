@@ -2,17 +2,15 @@
 
 #include "../Public/shader_xrlc.h"
 #include "../../xrcore/xrPool.h"
-//#include "xrface.h"
+
 #include "xrfacedefs.h"
 #include "xrdeflectordefs.h"
 #include "b_build_texture.h"
 #include "base_lighting.h"
 #include "../../editors/LevelEditor/Engine/communicate.h"
-//#include "mu_model_face.h"
-//#include "mu_model_face_defs.h"
-//struct _face;
-//struct _vertex;
-namespace CDB{
+ 
+namespace CDB
+{
 class MODEL;
 class CollectorPacked;
 };
@@ -119,16 +117,7 @@ public:
 		CDB::MODEL*					RCAST_Model		()		{	return _cl_globs._RCAST_Model; }
 		xr_vector<xrMU_Model*>		&mu_models		()		{	return _mu_models; }
 		xr_vector<xrMU_Reference*>	&mu_refs		()		{	return _mu_refs; }
-
-		void						read_mu_models			( INetReader &r );
-		void						write_mu_models			( IWriter	&w ) const ;
-
-		void						read_mu_model_refs		( INetReader &r );
-		void						write_mu_model_refs		( IWriter	&w ) const ;
-		void						close_models_read		();
-		void						close_models_write		()const ;
-
-
+		 
 		bool						b_nosun			()		{	return _b_nosun; }
 		bool						gl_linear		()		{	return _gl_linear; }
 IC		void						b_nosun_set		(bool v){	_b_nosun = v; }
@@ -143,40 +132,15 @@ IC		void						b_nosun_set		(bool v){	_b_nosun = v; }
 
 		void						set_faces_indexses		();
 		void						set_vertices_indexses	();
-		//void						create_write_faces	() const;
-		//void						destroy_write_faces	() const;
-		//void						create_read_faces	() ;
-		//void						destroy_read_faces	() ;
-
-//		tread_faces					*get_read_faces		()	;
-//		twrite_faces				*get_write_faces	()	;
-		
-
+ 
 
 		void						gl_mesh_clear			()		;
-private:
-//std::pair<u32,u32>					get_id				( const _face * v ) const;
-//std::pair<u32,u32>					get_id				( const _vertex * v ) const;
-public:
-		void						read_base				( INetReader &r );
-		void						write_base				( IWriter	&w ) const ;
-		void						read					( INetReader &r );
-		void						write					( IWriter	&w ) const ;
-		void						read_vertices			( INetReader	&r );
-		void						write_vertices			( IWriter	&w )const;
-		void						read_lm_data			( INetReader	&r );
-		void						write_lm_data			( IWriter	&w )const;
-
-		void						read_modes_color		( INetReader	&r );
-		void						write_modes_color		( IWriter	&w )const;
-
-		void						read					( INetReader &r, base_Face* &f);
-		void						write					( IWriter &r, const base_Face *f ) const ;
+  
 		void						clear					();
 		void						clear_mesh				();
 		void						clear_mu_models			();	
 		void						mu_models_calc_materials();
-	//	void						cdb_read_create	() ;
+ 
 private:
 
 
@@ -198,5 +162,4 @@ static LPCSTR libraries = "XRLC_LightStab.dll,XRLC_Light.dll,xrCore.dll,xrCDB.dl
 #else
 static LPCSTR libraries = "XRLC_LightStab.dll,XRLC_Light.dll,xrCore.dll,xrCDB.dll,xrAPI.dll,DXT.dll,BugTrap.dll,FreeImage.dll,msvcr80.dll,Microsoft.VC80.CRT.manifest";
 #endif
-//#define NET_CMP
-//#define LOAD_GL_DATA
+ 
